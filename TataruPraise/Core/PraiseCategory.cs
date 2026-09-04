@@ -122,6 +122,28 @@ public static class PraiseCategory
     /// <summary>通知：收到交易請求（內建觸發，看交易視窗 addon 出現）。<b>鍵名由 IPC 呼叫端逐字使用。</b></summary>
     public const string TradeRequest = "交易請求";
 
+    /// <summary>通知：自動跑本停下來（AutoDuty 叫）。<b>鍵名由 IPC 呼叫端逐字使用。</b></summary>
+    /// <remarks>
+    /// 📌 「停下來」<b>不等於「跑完了」</b>：正常結束與中途卡住都會走這個鍵。
+    /// 想知道「是不是出事了」請聽 <see cref="NeedHelp"/>，那是呼叫端明確判定成卡住才叫的。
+    /// </remarks>
+    public const string DutyRunStopped = "跑本停止";
+
+    /// <summary>通知：自動採集停下來（GatherbuddyReborn 叫）。<b>鍵名由 IPC 呼叫端逐字使用。</b></summary>
+    public const string GatherStopped = "採集停止";
+
+    /// <summary>通知：釣到稀有魚（AutoHook 叫）。<b>鍵名由 IPC 呼叫端逐字使用。</b></summary>
+    public const string RareFish = "稀有魚";
+
+    /// <summary>通知：附近出現 A／B／S 級魔物（HuntHelper 叫）。<b>鍵名由 IPC 呼叫端逐字使用。</b></summary>
+    public const string HuntFound = "發現魔物";
+
+    /// <summary>通知：背包快滿了（InventoryTools 叫）。<b>鍵名由 IPC 呼叫端逐字使用。</b></summary>
+    public const string BagAlmostFull = "背包快滿";
+
+    /// <summary>通知：每日重置（DailyDuty 叫）。<b>鍵名由 IPC 呼叫端逐字使用。</b></summary>
+    public const string DailyReset = "每日重置";
+
     /// <summary>
     /// 內建情境，順序即 UI 上的顯示順序。
     /// </summary>
@@ -162,6 +184,12 @@ public static class PraiseCategory
         TellReceived,
         PartyInvite,
         TradeRequest,
+        DutyRunStopped,
+        GatherStopped,
+        RareFish,
+        HuntFound,
+        BagAlmostFull,
+        DailyReset,
     ];
 
     /// <summary>內建情境的預設「情境描述」（餵給文字後端，比分類名多一點上下文）。</summary>
@@ -198,6 +226,12 @@ public static class PraiseCategory
         [TellReceived] = "這是通知，不是誇獎：有人傳密語給前輩了。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
         [PartyInvite] = "這是通知，不是誇獎：有人邀請前輩加入隊伍，畫面上跳出了邀請視窗。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
         [TradeRequest] = "這是通知，不是誇獎：有人要跟前輩交易，畫面上跳出了交易視窗。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
+        [DutyRunStopped] = "這是通知，不是誇獎：前輩的自動跑本停下來了（跑完或中途停住都算）。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
+        [GatherStopped] = "這是通知，不是誇獎：前輩的自動採集停下來了。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
+        [RareFish] = "這是通知，不是誇獎：前輩釣到了一條稀有的魚。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
+        [HuntFound] = "這是通知，不是誇獎：附近出現了正在找的稀有魔物。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
+        [BagAlmostFull] = "這是通知，不是誇獎：前輩的背包快要塞滿了。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
+        [DailyReset] = "這是通知，不是誇獎：每日的重置時間到了，新的一輪可以開始。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
     };
 
     /// <summary>
@@ -246,6 +280,12 @@ public static class PraiseCategory
         [TellReceived] = 12,
         [PartyInvite] = 12,
         [TradeRequest] = 12,
+        [DutyRunStopped] = 12,
+        [GatherStopped] = 12,
+        [RareFish] = 12,
+        [HuntFound] = 12,
+        [BagAlmostFull] = 12,
+        [DailyReset] = 12,
     };
 
     /// <summary>
@@ -286,6 +326,12 @@ public static class PraiseCategory
         [TellReceived] = 2,
         [PartyInvite] = 2,
         [TradeRequest] = 2,
+        [DutyRunStopped] = 2,
+        [GatherStopped] = 2,
+        [RareFish] = 2,
+        [HuntFound] = 2,
+        [BagAlmostFull] = 2,
+        [DailyReset] = 2,
     };
 
     /// <summary>
@@ -325,6 +371,12 @@ public static class PraiseCategory
         [TellReceived] = 5,
         [PartyInvite] = 5,
         [TradeRequest] = 5,
+        [DutyRunStopped] = 5,
+        [GatherStopped] = 5,
+        [RareFish] = 5,
+        [HuntFound] = 5,
+        [BagAlmostFull] = 5,
+        [DailyReset] = 5,
     };
 
     /// <summary>內建的句長下限覆寫；沒有就回 0（＝用全域下限）。</summary>

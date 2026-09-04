@@ -60,5 +60,11 @@ public static class DefaultPool
         [PraiseCategory.TellReceived] = ["有人密你！"],
         [PraiseCategory.PartyInvite] = ["組隊邀請！"],
         [PraiseCategory.TradeRequest] = ["交易請求！"],
+        [PraiseCategory.DutyRunStopped] = ["跑本停了！"],
+        [PraiseCategory.GatherStopped] = ["採集停了！"],
+        [PraiseCategory.RareFish] = ["釣到稀有魚！"],
+        [PraiseCategory.HuntFound] = ["發現魔物！"],
+        [PraiseCategory.BagAlmostFull] = ["背包快滿了！"],
+        [PraiseCategory.DailyReset] = ["每日重置！"],
     };
 }

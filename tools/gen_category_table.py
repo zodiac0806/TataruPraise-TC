@@ -51,6 +51,12 @@ SOURCES = {
     "TellReceived": ("通知", "內建：`IChatGui.ChatMessage` 的 `TellIncoming` 類型"),
     "PartyInvite": ("通知", "內建：組隊邀請彈窗 addon 出現（`IAddonLifecycle`）"),
     "TradeRequest": ("通知", "內建：交易視窗 addon 出現（`IAddonLifecycle`）"),
+    "DutyRunStopped": ("通知", "AutoDuty：自動跑本停下來"),
+    "GatherStopped": ("通知", "GatherbuddyReborn：自動採集停下來"),
+    "RareFish": ("通知", "AutoHook：釣到稀有魚"),
+    "HuntFound": ("通知", "HuntHelper：A／B／S 級魔物出現"),
+    "BagAlmostFull": ("通知", "InventoryTools：背包快滿"),
+    "DailyReset": ("通知", "DailyDuty：每日重置"),
 }
 
 
