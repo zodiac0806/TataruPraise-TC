@@ -246,11 +246,12 @@ public sealed class PraiseService : IDisposable
 
         // 即時合成：不在呼叫端的執行緒上等 HTTP。
         var host = config.TtsHost;
+        var apiKey = config.TtsApiKey;
         var voice = config.VoiceId;
         var volume = config.Volume;
         _ = Task.Run(async () =>
         {
-            var wav = await TtsBridge.SynthesizeAsync(host, voice, trimmed, 10).ConfigureAwait(false);
+            var wav = await TtsBridge.SynthesizeAsync(host, voice, trimmed, 10, apiKey).ConfigureAwait(false);
             if (wav == null) return;
 
             TryWriteCache(trimmed, wav);

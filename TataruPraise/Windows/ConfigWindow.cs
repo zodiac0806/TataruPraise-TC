@@ -460,7 +460,24 @@ public sealed class ConfigWindow : Window
             ImGui.SetTooltip(
                 "本機 GPT-SoVITS 橋接（gsv_bridge）的位址，預設 http://127.0.0.1:9882。\n"
                 + "如果橋接跑在另一台機器，那邊要綁 0.0.0.0 並開防火牆，這裡填區網 IP。\n"
+                + "也可以填任何相容的 HTTP API（需要 GET /speakers、POST / 這兩個接點）。\n"
                 + "連不上的時候外掛只是不出聲，不會卡遊戲。");
+        }
+
+        var apiKey = Config.TtsApiKey;
+        ImGui.SetNextItemWidth(300f);
+        if (ImGui.InputText("API Key##ttsApiKey", ref apiKey, 256, ImGuiInputTextFlags.Password))
+        {
+            Config.TtsApiKey = apiKey;
+            Config.Save();
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(
+                "非必填。有填的話每次請求會加上 Authorization: Bearer <key>。\n"
+                + "本機、沒有驗證的橋接留空即可；架在需要驗證的服務或反向代理後面才需要填。\n"
+                + "存在本機設定檔裡（明文），跟其他外掛設定一樣不會加密。");
         }
 
         ImGui.SameLine();
@@ -1758,9 +1775,10 @@ public sealed class ConfigWindow : Window
         probeMessage = string.Empty;
 
         var host = Config.TtsHost;
+        var apiKey = Config.TtsApiKey;
         _ = Task.Run(async () =>
         {
-            var result = await TtsBridge.GetSpeakersAsync(host).ConfigureAwait(false);
+            var result = await TtsBridge.GetSpeakersAsync(host, apiKey).ConfigureAwait(false);
             if (result == null)
             {
                 speakers = [];

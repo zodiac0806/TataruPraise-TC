@@ -139,8 +139,14 @@ public sealed class Configuration : IPluginConfiguration
 
 
     // ── 語音橋接（GPT-SoVITS，預設同機）──────────────────────────────
-    /// <summary>TTS 橋接位址。同機就是 127.0.0.1:9882；異機要填區網 IP 且對方要綁 0.0.0.0。</summary>
+    /// <summary>TTS 橋接位址。同機就是 127.0.0.1:9882；異機要填區網 IP 且對方要綁 0.0.0.0。也可以填任何相容的 HTTP API。</summary>
     public string TtsHost { get; set; } = "http://127.0.0.1:9882";
+
+    /// <summary>
+    /// TTS 橋接的 API Key。非空時每次呼叫都會加上 <c>Authorization: Bearer &lt;key&gt;</c>。
+    /// 本機、沒有驗證的橋接留空即可；架在需要驗證的服務或反向代理後面才需要填。
+    /// </summary>
+    public string TtsApiKey { get; set; } = "";
 
     /// <summary>聲線 id（橋接 <c>GET /speakers</c> 回的 <c>voice_id</c>）。</summary>
     public string VoiceId { get; set; } = "塔塔露";

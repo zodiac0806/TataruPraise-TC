@@ -425,6 +425,7 @@ public sealed class PoolJobs : IDisposable
         }
 
         var host = config.TtsHost;
+        var apiKey = config.TtsApiKey;
         var voice = config.VoiceId;
         var ok = 0;
         var failed = 0;
@@ -436,7 +437,7 @@ public sealed class PoolJobs : IDisposable
 
             var text = pending[i];
 
-            var wav = await TtsBridge.SynthesizeAsync(host, voice, text, 60).ConfigureAwait(false);
+            var wav = await TtsBridge.SynthesizeAsync(host, voice, text, 60, apiKey).ConfigureAwait(false);
             if (wav == null)
             {
                 failed++;

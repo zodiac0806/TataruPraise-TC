@@ -85,17 +85,38 @@ public static class TtsBridge
         return $"./参考音频/{id}.wav";
     }
 
+    /// <summary>
+    /// 非空時，幫這次請求加上 <c>Authorization: Bearer &lt;key&gt;</c>。
+    /// </summary>
+    /// <remarks>
+    /// 🔴 <b>刻意每次請求各自建一個 <see cref="HttpRequestMessage"/>，不動 <see cref="Http"/> 的
+    /// <c>DefaultRequestHeaders</c>。</b><see cref="Http"/> 是整個外掛共用的靜態實例，
+    /// 若把 API Key 寫進預設標頭，使用者在設定視窗改了 Key 或清空之後，
+    /// 舊值還是會留在下一次請求裡——這裡才是唯一會被讀到「當下設定值」的地方。
+    /// </remarks>
+    private static void ApplyAuth(HttpRequestMessage request, string apiKey)
+    {
+        if (!string.IsNullOrWhiteSpace(apiKey))
+        {
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey.Trim());
+        }
+    }
+
     /// <summary>列出聲線。失敗回 <c>null</c>（與「回了空陣列」分得開）。</summary>
-    public static async Task<List<SpeakerInfo>?> GetSpeakersAsync(string host, int timeoutSeconds = 10)
+    public static async Task<List<SpeakerInfo>?> GetSpeakersAsync(string host, string apiKey = "", int timeoutSeconds = 10)
     {
         var url = NormalizeHost(host) + "/speakers";
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
-            using var response = await Http.GetAsync(url, cts.Token).ConfigureAwait(false);
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            ApplyAuth(request, apiKey);
+            using var response = await Http.SendAsync(request, cts.Token).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
-                Svc.Log.Information($"[TataruPraise] 取得聲線清單失敗：HTTP {(int)response.StatusCode}（{url}）");
+                var code = (int)response.StatusCode;
+                var hint = code is 401 or 403 ? "（API Key 不對或沒填）" : string.Empty;
+                Svc.Log.Information($"[TataruPraise] 取得聲線清單失敗：HTTP {code}{hint}（{url}）");
                 return null;
             }
 
@@ -140,7 +161,8 @@ public static class TtsBridge
     /// <param name="voiceId">聲線 id。</param>
     /// <param name="text">要念的中文（<b>必須含自然標點</b>）。</param>
     /// <param name="timeoutSeconds">即時合成建議 10 秒；預合成按鈕用 60 秒。</param>
-    public static async Task<byte[]?> SynthesizeAsync(string host, string voiceId, string text, int timeoutSeconds)
+    /// <param name="apiKey">非空時加上 <c>Authorization: Bearer</c>，見 <see cref="ApplyAuth"/>。</param>
+    public static async Task<byte[]?> SynthesizeAsync(string host, string voiceId, string text, int timeoutSeconds, string apiKey = "")
     {
         var url = NormalizeHost(host) + "/";
         var payload = new Dictionary<string, string>
@@ -153,15 +175,20 @@ public static class TtsBridge
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
-            using var content = new StringContent(
-                JsonSerializer.Serialize(payload, JsonOpts), Encoding.UTF8, "application/json");
-            using var response = await Http.PostAsync(url, content, cts.Token).ConfigureAwait(false);
+            using var request = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = new StringContent(
+                    JsonSerializer.Serialize(payload, JsonOpts), Encoding.UTF8, "application/json")
+            };
+            ApplyAuth(request, apiKey);
+            using var response = await Http.SendAsync(request, cts.Token).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
                 var code = (int)response.StatusCode;
                 var hint = code switch
                 {
+                    401 or 403 => "（API Key 不對或沒填）",
                     404 => "（聲線沒有設定）",
                     502 => "（橋接背後的 api_v2 連不上）",
                     _ => string.Empty,
