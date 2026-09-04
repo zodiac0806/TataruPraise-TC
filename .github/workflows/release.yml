@@ -1,4 +1,11 @@
 # 台服 (TC) 發版（TataruPraise）。由 release_plugin.py 以 workflow_dispatch 觸發，Dalamud 釘在 API13 (dalamud-pin-v13.0.0.16)。
+# 🔴 2026-09-04：本 repo 做過一次「刪除後同名重建」（把外來 fork 的關聯從我方這側清掉）。
+#    重建之後 GitHub 只會自動註冊「有被 push 事件觸發過」的 workflow —— 這一支是
+#    workflow_dispatch-only，當下 `gh workflow list` 只看得到 Build Check，Release 不見了，
+#    而 release_plugin.py 正是靠 dispatch 這一支發版 ⇒ 不重新註冊的話下一次發版會直接失敗。
+#    🔑 重新註冊的方法就是「對這個檔案做一次 commit 並推上去」，然後用
+#       `gh workflow list --repo ffxiv-tc-port/TataruPraise` 確認它回來了。
+#    ⚠️ 失敗形式是靜默的：repo 看起來一切正常，只有發版那一刻才會炸。
 #
 # ⚠️ 產出路徑不要用「慣例」去推。Dalamud.NET.Sdk 13 直建 csproj 的實際輸出是
 #      TataruPraise/bin/Release/TataruPraise.dll        （組件）
