@@ -24,7 +24,7 @@ public sealed class IpcProvider : IDisposable
     /// 已經為哪些「未知情境」印過警告（每個情境只印一次）。
     /// </summary>
     /// <remarks>
-    /// 🔴 呼叫端很可能在自己的迴圈裡叫 <c>Praise</c>，鍵名打錯就會每秒洗一行 log——
+    /// 🔴 呼叫端很可能在自己的迴圈裡叫 <c>IsAvailableFor</c>／<c>Praise</c>，鍵名打錯就會每秒洗一行 log——
     /// 而記錄檔是使用者事後唯一的診斷來源。印一次就夠了：訊息本身講的是設定問題，不是狀態。
     /// <para>
     /// 🔴 這個集合會被<b>呼叫端的執行緒</b>碰到（IPC 的實作是在對方的執行緒上跑的），所以要上鎖。
@@ -62,7 +62,7 @@ public sealed class IpcProvider : IDisposable
                 //    但前者是呼叫端把鍵名打錯／使用者還沒建那個情境，永遠不會好。
                 if (!service.HasCategory(category))
                 {
-                    WarnUnknownCategoryOnce(category);
+                    WarnUnknownCategoryOnce(category, "Praise");
                     return false;
                 }
 
@@ -92,8 +92,17 @@ public sealed class IpcProvider : IDisposable
         {
             try
             {
-                // 📌 這裡刻意不對未知情境印警告：呼叫端問「能不能出聲」是<b>查詢</b>，
-                //    回 false 就是正確答案；真的去叫 Praise 時才會走到 WarnUnknownCategoryOnce。
+                // 🔴 未知情境要跟「有情境但現在不能出聲」分得開：兩者都回 false，
+                //    但前者是呼叫端把鍵名打錯／使用者還沒建那個情境，永遠不會好。
+                // 📌 這裡從前刻意不印警告，把它留給 Praise；那個前提已經失效——
+                //    消費端現在一律先問這個端點、回 false 就早退，Praise 再也走不到，
+                //    警告不在這裡印就沒有任何地方會印。
+                if (!service.HasCategory(category))
+                {
+                    WarnUnknownCategoryOnce(category, "IsAvailableFor");
+                    return false;
+                }
+
                 return service.IsAvailableFor(category);
             }
             catch (Exception ex)
@@ -109,7 +118,13 @@ public sealed class IpcProvider : IDisposable
     }
 
     /// <summary>對一個沒見過的情境印一次 Information（之後同一個情境不再印）。</summary>
-    private void WarnUnknownCategoryOnce(string? category)
+    /// <param name="category">呼叫端送進來的情境鍵名。</param>
+    /// <param name="endpoint">是哪一個端點收到的，只寫進訊息裡（<c>Praise</c>／<c>IsAvailableFor</c>）。</param>
+    /// <remarks>
+    /// 📌 兩個端點共用同一個 <see cref="warnedUnknownCategories"/>：同一個鍵名只印一次，
+    /// 先撞到的那個端點寫下訊息，之後另一個端點再撞到也不會重印。
+    /// </remarks>
+    private void WarnUnknownCategoryOnce(string? category, string endpoint)
     {
         var name = category ?? string.Empty;
 
@@ -118,7 +133,7 @@ public sealed class IpcProvider : IDisposable
         if (!first) return;
 
         Svc.Log.Information(
-            $"[TataruPraise] IPC Praise 收到未知情境「{name}」，這次不出聲。"
+            $"[TataruPraise] IPC {endpoint} 收到未知情境「{name}」，一律回 false。"
             + "請在設定視窗「短句」分頁的「進階」按「新增情境」建立同名情境，再打一句短句並合成語音。"
             + "（同一個情境只提醒這一次。）");
     }
