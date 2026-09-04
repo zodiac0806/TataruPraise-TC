@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -244,6 +246,143 @@ public sealed class PraisePool
         duplicates = skipped;
         if (added > 0) Save();
         return added;
+    }
+
+    /// <summary>
+    /// 匯出「已經合成好語音」的句子與對應的 wav 檔，打包成一個 zip：
+    /// <c>manifest.json</c>（情境 → 句子清單）＋ <c>cache/&lt;sha1&gt;.wav</c>。
+    /// </summary>
+    /// <remarks>
+    /// 🔴 判準是<b>句子在池裡有紀錄，而且雜湊出來的 wav 檔真的存在</b>——不看 <see cref="PraiseLine.Wav"/>
+    /// 那個字串欄位，跟 <see cref="TryTrigger"/> 選句時用的判準完全一致（見 <c>PraisePool.cs</c> 別處的
+    /// <c>File.Exists(CachePathFor(text))</c>），這樣匯出的東西保證對方拿去用一定播得出來。
+    /// <para>
+    /// 📌 同一句話在多個情境重複用，雜湊檔名一樣，zip 裡只打包一份，不重複佔空間。
+    /// </para>
+    /// </remarks>
+    /// <returns>成功回傳（匯出幾句、幾個不重複的音檔），失敗回傳 <see langword="null"/>（已經寫記錄檔）。</returns>
+    public (int Lines, int Files)? ExportSynthesized(string zipPath)
+    {
+        Dictionary<string, List<string>> ready;
+        lock (gate)
+        {
+            ready = pool
+                .Select(kv => (kv.Key, Texts: kv.Value.Select(l => l.Text).Where(t => File.Exists(CachePathFor(t))).ToList()))
+                .Where(x => x.Texts.Count > 0)
+                .ToDictionary(x => x.Key, x => x.Texts);
+        }
+
+        if (ready.Count == 0)
+        {
+            Svc.Log.Information("[TataruPraise] 匯出誇獎池：目前沒有任何一句已經合成好語音，取消匯出。");
+            return null;
+        }
+
+        try
+        {
+            if (File.Exists(zipPath)) File.Delete(zipPath);
+            using var zip = ZipFile.Open(zipPath, ZipArchiveMode.Create);
+
+            using (var writer = new StreamWriter(zip.CreateEntry("manifest.json").Open(), new UTF8Encoding(false)))
+            {
+                writer.Write(JsonSerializer.Serialize(ready, JsonOpts));
+            }
+
+            var seenFiles = new HashSet<string>(StringComparer.Ordinal);
+            var lineCount = 0;
+            foreach (var texts in ready.Values)
+            {
+                foreach (var text in texts)
+                {
+                    lineCount++;
+                    var fileName = CacheFileName(text);
+                    if (!seenFiles.Add(fileName)) continue;
+                    zip.CreateEntryFromFile(CachePathFor(text), $"cache/{fileName}");
+                }
+            }
+
+            return (lineCount, seenFiles.Count);
+        }
+        catch (Exception ex)
+        {
+            Svc.Log.Information($"[TataruPraise] 匯出誇獎池失敗：{ex.Message}（{zipPath}）");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// 從 <see cref="ExportSynthesized"/> 匯出的 zip 匯入。<b>只新增，不覆蓋、不刪除既有內容</b>：
+    /// 句子走 <see cref="AddLines(string,System.Collections.Generic.IEnumerable{string},out int)"/>
+    /// 既有的「同情境內完全相同的句子就跳過」邏輯；wav 檔案名是內容雜湊，本地已經有的就跳過，
+    /// 不會有「該覆蓋哪一份」的問題（檔名相同＝內容相同）。
+    /// </summary>
+    /// <returns>
+    /// 成功回傳（新增幾句、新增幾個音檔、因重複而跳過幾句），失敗（檔案不存在／不是本外掛匯出的格式／
+    /// 讀取或寫入出錯）回傳 <see langword="null"/>（已經寫記錄檔）。
+    /// </returns>
+    public (int AddedLines, int AddedFiles, int SkippedLines)? ImportFrom(string zipPath)
+    {
+        if (string.IsNullOrWhiteSpace(zipPath) || !File.Exists(zipPath))
+        {
+            Svc.Log.Information($"[TataruPraise] 匯入誇獎池失敗：找不到檔案（{zipPath}）");
+            return null;
+        }
+
+        try
+        {
+            using var zip = ZipFile.OpenRead(zipPath);
+            var manifestEntry = zip.GetEntry("manifest.json");
+            if (manifestEntry == null)
+            {
+                Svc.Log.Information("[TataruPraise] 匯入誇獎池失敗：這個 zip 不是本外掛匯出的誇獎池（缺少 manifest.json）。");
+                return null;
+            }
+
+            Dictionary<string, List<string>>? manifest;
+            using (var reader = new StreamReader(manifestEntry.Open(), Encoding.UTF8))
+            {
+                manifest = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(reader.ReadToEnd(), JsonOpts);
+            }
+
+            if (manifest == null || manifest.Count == 0)
+            {
+                Svc.Log.Information("[TataruPraise] 匯入誇獎池失敗：manifest.json 是空的或格式不對。");
+                return null;
+            }
+
+            Directory.CreateDirectory(cacheDir);
+
+            var addedFiles = 0;
+            foreach (var texts in manifest.Values)
+            {
+                foreach (var text in texts)
+                {
+                    var fileName = CacheFileName(text);
+                    var destPath = Path.Combine(cacheDir, fileName);
+                    if (File.Exists(destPath)) continue;
+
+                    var wavEntry = zip.GetEntry($"cache/{fileName}");
+                    if (wavEntry == null) continue;
+                    wavEntry.ExtractToFile(destPath, overwrite: false);
+                    addedFiles++;
+                }
+            }
+
+            var addedLines = 0;
+            var skippedLines = 0;
+            foreach (var (category, texts) in manifest)
+            {
+                addedLines += AddLines(category, texts, out var duplicates);
+                skippedLines += duplicates;
+            }
+
+            return (addedLines, addedFiles, skippedLines);
+        }
+        catch (Exception ex)
+        {
+            Svc.Log.Information($"[TataruPraise] 匯入誇獎池失敗：{ex.Message}（{zipPath}）");
+            return null;
+        }
     }
 
     /// <summary>

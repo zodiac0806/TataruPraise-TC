@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Numerics;
 using System.Threading.Tasks;
 using Dalamud.Bindings.ImGui;
@@ -39,6 +40,10 @@ public sealed class ConfigWindow : Window
     private SpeakerProbeState probeState = SpeakerProbeState.NotProbed;
     private List<SpeakerInfo> speakers = [];
     private string probeMessage = string.Empty;
+
+    private string exportResultMessage = string.Empty;
+    private string importPath = string.Empty;
+    private string importResultMessage = string.Empty;
 
     public ConfigWindow(Plugin plugin) : base("塔塔露誇獎###TataruPraiseConfig")
     {
@@ -623,6 +628,91 @@ public sealed class ConfigWindow : Window
         ImGui.TextDisabled("池與語音快取的位置");
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip($"{plugin.Pool.PoolPath}\n{plugin.Pool.CacheDirectory}");
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+        DrawExportImport();
+    }
+
+    /// <summary>
+    /// 把「已經合成好語音」的句子＋音檔打包成一個 zip，方便直接送給朋友——
+    /// 對方匯入之後那些句子不用重新架橋接、不用再等一次 TTS 合成就能用。
+    /// </summary>
+    /// <remarks>
+    /// 🔴 <b>不做原生檔案選取視窗</b>：這個外掛沒有其他地方需要它，為這一個功能專門疊一層
+    /// Win32 GetOpenFileName／GetSaveFileName 的 P/Invoke 划不來。匯出固定寫到桌面、
+    /// 檔名帶時間戳記；匯入靠使用者自己把路徑貼進輸入框——跟上面「橋接位址」那個輸入框
+    /// 是同一種 UI，不算額外的認知負擔。
+    /// </remarks>
+    private void DrawExportImport()
+    {
+        ImGui.TextDisabled("分享已合成的語音給朋友");
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(
+                "「匯出」會把目前已經合成好語音的句子連同音檔打包成一個 zip，存到桌面，方便你直接傳給朋友。\n"
+                + "對方在他自己的塔塔露誇獎裡貼上收到的檔案路徑按「匯入」，那些句子跟音檔就會補進他的誇獎池——\n"
+                + "他不需要自己架橋接、也不用重新合成一次。\n"
+                + "匯入只會新增，不會覆蓋或刪除對方原本就有的句子與音檔。");
+        }
+
+        if (ImGui.Button("匯出已合成的誇獎池##exportPool"))
+        {
+            var fileName = $"TataruPraise-Export-{DateTime.Now:yyyyMMdd-HHmmss}.zip";
+            var zipPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), fileName);
+            var result = plugin.Pool.ExportSynthesized(zipPath);
+            if (result is { } ok)
+            {
+                exportResultMessage = $"已匯出 {ok.Lines} 句（{ok.Files} 個音檔）到桌面：{fileName}";
+                try
+                {
+                    ImGui.SetClipboardText(zipPath);
+                    exportResultMessage += "\n完整路徑已複製到剪貼簿。";
+                }
+                catch
+                {
+                    // 複製到剪貼簿失敗不影響匯出本身有沒有成功，不特別處理。
+                }
+            }
+            else
+            {
+                exportResultMessage = "匯出失敗，或目前沒有任何一句已經合成好語音，詳見 /xllog。";
+            }
+        }
+
+        if (exportResultMessage.Length > 0)
+        {
+            ImGui.PushTextWrapPos(ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X);
+            ImGui.TextColored(ColorOk, exportResultMessage);
+            ImGui.PopTextWrapPos();
+        }
+
+        ImGui.Spacing();
+
+        ImGui.SetNextItemWidth(400f);
+        ImGui.InputText("收到的 zip 路徑##importPath", ref importPath, 512);
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip("把朋友傳給你的 zip 檔路徑貼在這裡（例如存到桌面之後，從檔案總管複製路徑）。");
+
+        ImGui.SameLine();
+        var canImport = importPath.Trim().Length > 0;
+        ImGui.BeginDisabled(!canImport);
+        if (ImGui.Button("匯入##importPool"))
+        {
+            var result = plugin.Pool.ImportFrom(importPath.Trim());
+            importResultMessage = result is { } ok
+                ? $"匯入完成：新增 {ok.AddedLines} 句、{ok.AddedFiles} 個音檔（{ok.SkippedLines} 句本來就有，已跳過）。"
+                : "匯入失敗，請確認路徑正確、檔案是本外掛匯出的格式，詳見 /xllog。";
+        }
+        ImGui.EndDisabled();
+
+        if (importResultMessage.Length > 0)
+        {
+            ImGui.PushTextWrapPos(ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X);
+            ImGui.TextColored(ColorOk, importResultMessage);
+            ImGui.PopTextWrapPos();
+        }
     }
 
     /// <summary>
