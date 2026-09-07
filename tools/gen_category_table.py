@@ -31,7 +31,7 @@ SOURCES = {
     "Submarine": ("通知", "AutoRetainer：潛艇整隊回港／僱員探險全收"),
     "Retainer": ("通知", "AutoRetainer：僱員探險完成"),
     "ExpertDelivery": ("通知", "AutoRetainer：稀有品繳交循環全部角色跑完"),
-    "Market": ("通知", "Marketbuddy：市場重掛整輪跑完"),
+    "Market": ("通知", "Marketbuddy：市場重掛或跨世界巡價整輪跑完"),
     "Crafting": ("通知", "Artisan：整份清單製作完成"),
     "Cosmic": ("通知", "ICE：宇宙探索任務金評"),
     "LowHp": ("警示", "內建：戰鬥中血量跌破門檻"),

@@ -3,11 +3,14 @@ using System.Collections.Generic;
 namespace TataruPraise.Core;
 
 /// <summary>
-/// 內建的預設誇獎池：<b>每個情境一句極短提示</b>。
+/// 內建的預設誇獎池：<b>每個情境一到幾句極短提示</b>。
 /// </summary>
 /// <remarks>
 /// 🔴 <b>定位＝「不是要太多對話，只是要有聲音」</b>（使用者實機用過之後定調的）。
-/// 每個情境只有一句、全部在 8 個字以內，聽起來像音效而不是對白。
+/// 原則上每個情境只有一句、全部在 8 個字以內，聽起來像音效而不是對白。
+/// ⚠️ 例外是<b>「市場」</b>：Marketbuddy 的重掛收尾與跨世界價格巡檢共用同一個鍵，
+/// 所以除了原本那句講「重掛」的以外，另外備了三句不提重掛的通用句——
+/// 巡價跑完時念到「重掛好啦」會講錯事。
 /// 想要長句誇獎的人請自己在設定視窗的「進階」把句長上限調高，再用 Gemini 擴充池——
 /// <b>那是加上去的能力，不是預設</b>。
 /// <para>
@@ -40,7 +43,7 @@ public static class DefaultPool
         [PraiseCategory.Submarine] = ["潛艇回來啦！"],
         [PraiseCategory.Retainer] = ["僱員回來啦！"],
         [PraiseCategory.ExpertDelivery] = ["稀有品都交完啦！"],
-        [PraiseCategory.Market] = ["市場重掛好啦！"],
+        [PraiseCategory.Market] = ["市場重掛好啦！", "市場那邊看完囉！", "市場都弄完啦！", "行情都記下來了，辛苦啦！"],
         [PraiseCategory.Crafting] = ["製作完成！"],
         [PraiseCategory.Cosmic] = ["任務金評。"],
         [PraiseCategory.LowHp] = ["危險！"],
