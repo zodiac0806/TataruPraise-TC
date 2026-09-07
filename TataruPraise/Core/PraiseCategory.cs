@@ -147,6 +147,25 @@ public static class PraiseCategory
     public const string DailyReset = "每日重置";
 
     /// <summary>
+    /// 通知：全艦隊急停已經把所有會自己動的外掛都停下來了（TCToolbox 叫）。<b>鍵名由 IPC 呼叫端逐字使用。</b>
+    /// </summary>
+    /// <remarks>
+    /// 📌 這個鍵沒有內建觸發，只由 TCToolbox 在<b>整輪急停跑完</b>時叫一次——
+    /// 不是每停一個外掛各響一次，後者在十幾個對象的清單上會變成洗版。
+    /// </remarks>
+    public const string FleetStop = "急停";
+
+    /// <summary>
+    /// 通知：全艦隊急停跑完了，<b>但有對象沒停下來</b>（TCToolbox 叫）。<b>鍵名由 IPC 呼叫端逐字使用。</b>
+    /// </summary>
+    /// <remarks>
+    /// 📌 跟 <see cref="FleetStop"/> 是<b>兩個不同的鍵</b>，刻意的：急停最需要它動的時候，
+    /// 正好是某個外掛已經出事的時候——「全部停好了」跟「有幾個停不下來」念同一句話等於沒講。
+    /// ⚠️ 呼叫端只在真的有對象停不下來時叫這個鍵；<b>「對方沒安裝」不算失敗</b>，那是最常見的狀態。
+    /// </remarks>
+    public const string FleetStopFailed = "急停失敗";
+
+    /// <summary>
     /// 內建情境，順序即 UI 上的顯示順序。
     /// </summary>
     /// <remarks>
@@ -192,6 +211,8 @@ public static class PraiseCategory
         HuntFound,
         BagAlmostFull,
         DailyReset,
+        FleetStop,
+        FleetStopFailed,
     ];
 
     /// <summary>內建情境的預設「情境描述」（餵給文字後端，比分類名多一點上下文）。</summary>
@@ -234,6 +255,8 @@ public static class PraiseCategory
         [HuntFound] = "這是通知，不是誇獎：附近出現了正在找的稀有魔物。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
         [BagAlmostFull] = "這是通知，不是誇獎：前輩的背包快要塞滿了。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
         [DailyReset] = "這是通知，不是誇獎：每日的重置時間到了，新的一輪可以開始。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
+        [FleetStop] = "這是通知，不是誇獎：前輩按了全艦隊急停，所有會自己動的外掛都已經停下來了。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
+        [FleetStopFailed] = "這是警示，不是誇獎：前輩按了全艦隊急停，但有幾個外掛沒能停下來，要前輩自己過去看一下。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
     };
 
     /// <summary>
@@ -288,6 +311,8 @@ public static class PraiseCategory
         [HuntFound] = 12,
         [BagAlmostFull] = 12,
         [DailyReset] = 12,
+        [FleetStop] = 12,
+        [FleetStopFailed] = 12,
     };
 
     /// <summary>
@@ -334,6 +359,8 @@ public static class PraiseCategory
         [HuntFound] = 2,
         [BagAlmostFull] = 2,
         [DailyReset] = 2,
+        [FleetStop] = 2,
+        [FleetStopFailed] = 2,
     };
 
     /// <summary>
@@ -379,6 +406,8 @@ public static class PraiseCategory
         [HuntFound] = 5,
         [BagAlmostFull] = 5,
         [DailyReset] = 5,
+        [FleetStop] = 5,
+        [FleetStopFailed] = 5,
     };
 
     /// <summary>內建的句長下限覆寫；沒有就回 0（＝用全域下限）。</summary>

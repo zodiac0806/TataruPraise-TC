@@ -24,10 +24,10 @@
 
 ## 功能
 
-- **33 個內建情境**（誇獎／通知／警示），每個情境出廠就有一句 8 字內的短句可以直接用，完整清單見下面「情境」。
+- **35 個內建情境**（誇獎／通知／警示），每個情境出廠就有一句 8 字內的短句可以直接用，完整清單見下面「情境」。
 - **內建觸發**（全部預設關閉，個別開關在「觸發」分頁）：`副本完成`、`升等`、`登入`、`Gil里程碑`、`血量低`、`被大量敵人標記`、`敵人從後面來`、`副本排到`、`被密語`、`組隊邀請`、`交易請求`。
 - **資訊列（DTR）圖示**：點一下切換總開關，tooltip 看最近觸發紀錄。
-- **開放給其他插件用 IPC 呼叫**：AutoRetainer、Marketbuddy、Artisan、ICE、NotificationMaster、PeepingTom、AutoDuty、GatherbuddyReborn、AutoHook、HuntHelper、InventoryTools、DailyDuty 都可以直接叫它出聲（見「IPC 契約」）。
+- **開放給其他插件用 IPC 呼叫**：AutoRetainer、Marketbuddy、Artisan、ICE、NotificationMaster、PeepingTom、AutoDuty、GatherbuddyReborn、AutoHook、HuntHelper、InventoryTools、DailyDuty、TCToolbox 都可以直接叫它出聲（見「IPC 契約」）。
 - **語音來自本機 GPT-SoVITS 橋接**，克隆塔塔露聲線；執行期完全不連網。
 - **可選：用 Gemini 擴充誇獎池**，每個情境生成更多句子，播放時隨機挑一句；不填金鑰插件也完整可用。
 
@@ -76,8 +76,10 @@
 | `發現魔物` | 通知 | 5 秒 | 2～12 字 | HuntHelper：A／B／S 級魔物出現 |
 | `背包快滿` | 通知 | 5 秒 | 2～12 字 | InventoryTools：背包快滿 |
 | `每日重置` | 通知 | 5 秒 | 2～12 字 | DailyDuty：每日重置 |
+| `急停` | 通知 | 5 秒 | 2～12 字 | TCToolbox：全艦隊急停整輪跑完，全部停妥 |
+| `急停失敗` | 通知 | 5 秒 | 2～12 字 | TCToolbox：全艦隊急停有對象沒停下來 |
 
-共 33 個內建情境。「全域」＝跟著設定視窗裡的全域冷卻／句長上限走；
+共 35 個內建情境。「全域」＝跟著設定視窗裡的全域冷卻／句長上限走；
 冷卻在「短句」分頁的表格列上直接改（旁邊的 × ＝清掉自訂）；句長上下限與情境描述在同一頁的「進階」裡改。
 
 <!-- END 情境表 -->

@@ -57,6 +57,8 @@ SOURCES = {
     "HuntFound": ("通知", "HuntHelper：A／B／S 級魔物出現"),
     "BagAlmostFull": ("通知", "InventoryTools：背包快滿"),
     "DailyReset": ("通知", "DailyDuty：每日重置"),
+    "FleetStop": ("通知", "TCToolbox：全艦隊急停整輪跑完，全部停妥"),
+    "FleetStopFailed": ("通知", "TCToolbox：全艦隊急停有對象沒停下來"),
 }
 
 

@@ -11,6 +11,8 @@ namespace TataruPraise.Core;
 /// ⚠️ 例外是<b>「市場」</b>：Marketbuddy 的重掛收尾與跨世界價格巡檢共用同一個鍵，
 /// 所以除了原本那句講「重掛」的以外，另外備了三句不提重掛的通用句——
 /// 巡價跑完時念到「重掛好啦」會講錯事。
+/// ⚠️ 另一組例外是<b>「急停」與「急停失敗」</b>：那是使用者自己按下去才會響的低頻事件，
+/// 多備幾句變化不會變成洗版；而「有東西沒停下來」更需要句子把話講清楚。
 /// 想要長句誇獎的人請自己在設定視窗的「進階」把句長上限調高，再用 Gemini 擴充池——
 /// <b>那是加上去的能力，不是預設</b>。
 /// <para>
@@ -69,5 +71,7 @@ public static class DefaultPool
         [PraiseCategory.HuntFound] = ["發現魔物！"],
         [PraiseCategory.BagAlmostFull] = ["背包快滿了！"],
         [PraiseCategory.DailyReset] = ["每日重置！"],
+        [PraiseCategory.FleetStop] = ["全部停下來了！", "都幫你停好了！", "緊急停止，完成！", "都停了，放心！"],
+        [PraiseCategory.FleetStopFailed] = ["有幾個停不下來！", "有的還沒停下！", "沒全停住，快看！", "快看，有漏的！"],
     };
 }
