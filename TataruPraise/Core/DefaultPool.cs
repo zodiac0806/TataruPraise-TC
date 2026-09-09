@@ -75,5 +75,6 @@ public static class DefaultPool
         [PraiseCategory.FleetStopFailed] = ["有幾個停不下來！", "有的還沒停下！", "沒全停住，快看！", "快看，有漏的！"],
         [PraiseCategory.MacroDone] = ["巨集跑完啦！"],
         [PraiseCategory.RouteDone] = ["路線走完啦！"],
+        [PraiseCategory.CosmicStopped] = ["宇宙那邊收工啦！"],
     };
 }

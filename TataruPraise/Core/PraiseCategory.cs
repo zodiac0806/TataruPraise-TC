@@ -58,7 +58,14 @@ public static class PraiseCategory
     /// </remarks>
     public const string Market = "市場";
 
-    /// <summary>Artisan：整份製作清單做完。<b>鍵名由 IPC 呼叫端逐字使用。</b></summary>
+    /// <summary>Artisan：掛著的製作跑完（整份製作清單，或耐力模式的連續製作）。<b>鍵名由 IPC 呼叫端逐字使用。</b></summary>
+    /// <remarks>
+    /// 📌 「整份清單跑完」與「耐力模式跑完」<b>刻意共用這一個鍵</b>：兩者都是「掛著的製作收工了」，
+    /// 頻率也同一個等級（都是整段自動化的收尾，不是每件成品各響一次），
+    /// 而且拆成兩個鍵會讓既有使用者多出一個<b>沒有語音、要自己按合成才會響</b>的情境。
+    /// ⚠️ 製作被錯誤打斷（連續錯誤、開不了製作、缺食物藥水而中止）走 <see cref="NeedHelp"/>，
+    /// 不走這個——「做完了」跟「做不下去了」念同一句話等於沒講。
+    /// </remarks>
     public const string Crafting = "製作";
 
     /// <summary>ICE：宇宙探索任務拿到金評價。<b>鍵名由 IPC 呼叫端逐字使用。</b></summary>
@@ -187,6 +194,19 @@ public static class PraiseCategory
     public const string RouteDone = "路線跑完";
 
     /// <summary>
+    /// 通知：ICE 的宇宙探索自動化<b>達成停止條件而停下來</b>（ICE 叫）。<b>鍵名由 IPC 呼叫端逐字使用。</b>
+    /// </summary>
+    /// <remarks>
+    /// 📌 跟 <see cref="Cosmic"/> 是<b>兩個不同的鍵</b>，刻意的：「宇宙」是<b>單一任務</b>拿到金評
+    /// （一輪農場會響很多次），這個是<b>整段自動化收工</b>（等級／宇宙評分／月靈點／宇宙點達標、
+    /// 靈器完成、標準任務全金、或使用者選的「跑完這輪就停」）。合成一個鍵的話，
+    /// 想只在收工時被叫一次的人會被每個任務各響一次洗版。
+    /// ⚠️ 卡住被迫停下（連續重骰找不到任務、這個職業在這個區域沒有可跑的任務）走
+    /// <see cref="NeedHelp"/>，不走這個——「跑完了」跟「卡住了」念同一句話等於沒講。
+    /// </remarks>
+    public const string CosmicStopped = "宇宙停止";
+
+    /// <summary>
     /// 內建情境，順序即 UI 上的顯示順序。
     /// </summary>
     /// <remarks>
@@ -236,6 +256,7 @@ public static class PraiseCategory
         FleetStopFailed,
         MacroDone,
         RouteDone,
+        CosmicStopped,
     ];
 
     /// <summary>內建情境的預設「情境描述」（餵給文字後端，比分類名多一點上下文）。</summary>
@@ -253,7 +274,7 @@ public static class PraiseCategory
         [Retainer] = "這是通知，不是誇獎：前輩的僱員探險完成了，東西可以收了。只輸出一句 2~12 字的極短提示，像喊出來的一樣；不要說明、不要鋪陳。",
         [ExpertDelivery] = "這是通知，不是誇獎：前輩的稀有品繳交循環把所有角色都跑完了。只輸出一句 2~12 字的極短提示，像喊出來的一樣；不要說明、不要鋪陳。",
         [Market] = "這是通知，不是誇獎：前輩的市場工作（重新上架或跨世界價格巡檢）全部跑完了。只輸出一句 2~12 字的極短提示，像喊出來的一樣；不要說明、不要鋪陳。",
-        [Crafting] = "這是通知，不是誇獎：前輩把整份製作清單做完了。只輸出一句 2~12 字的極短提示，像喊出來的一樣；不要說明、不要鋪陳。",
+        [Crafting] = "這是通知，不是誇獎：前輩掛著的製作跑完了（整份製作清單，或是耐力模式的連續製作）。只輸出一句 2~12 字的極短提示，像喊出來的一樣；不要說明、不要鋪陳。",
         [Cosmic] = "這是通知，不是誇獎：前輩在宇宙探索的任務拿到了金評價。只輸出一句 2~12 字的極短提示，像喊出來的一樣；不要說明、不要鋪陳。",
         [LowHp] = "這是戰鬥警示，不是誇獎：前輩的血量掉到危險線以下了，正在戰鬥中。只輸出一句 2~6 字的極短句，像喊出來的一樣；不要稱讚、不要說明、不要鋪陳。",
         [MarkedByMany] = "這是戰鬥警示，不是誇獎：好幾個敵對玩家同時鎖定了前輩。只輸出一句 2~6 字的極短句，像喊出來的一樣；不要稱讚、不要說明、不要鋪陳。",
@@ -282,6 +303,7 @@ public static class PraiseCategory
         [FleetStopFailed] = "這是警示，不是誇獎：前輩按了全艦隊急停，但有幾個外掛沒能停下來，要前輩自己過去看一下。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
         [MacroDone] = "這是通知，不是誇獎：前輩掛著的巨集從頭到尾跑完了。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
         [RouteDone] = "這是通知，不是誇獎：前輩的採集路線整條走完了。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
+        [CosmicStopped] = "這是通知，不是誇獎：前輩掛著的宇宙探索自動化達成了停止條件，整段收工停下來了。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
     };
 
     /// <summary>
@@ -340,6 +362,7 @@ public static class PraiseCategory
         [FleetStopFailed] = 12,
         [MacroDone] = 12,
         [RouteDone] = 12,
+        [CosmicStopped] = 12,
     };
 
     /// <summary>
@@ -390,6 +413,7 @@ public static class PraiseCategory
         [FleetStopFailed] = 2,
         [MacroDone] = 2,
         [RouteDone] = 2,
+        [CosmicStopped] = 2,
     };
 
     /// <summary>
@@ -439,6 +463,7 @@ public static class PraiseCategory
         [FleetStopFailed] = 5,
         [MacroDone] = 5,
         [RouteDone] = 5,
+        [CosmicStopped] = 5,
     };
 
     /// <summary>內建的句長下限覆寫；沒有就回 0（＝用全域下限）。</summary>

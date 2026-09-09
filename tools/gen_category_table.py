@@ -32,7 +32,7 @@ SOURCES = {
     "Retainer": ("通知", "AutoRetainer：僱員探險完成"),
     "ExpertDelivery": ("通知", "AutoRetainer：稀有品繳交循環全部角色跑完"),
     "Market": ("通知", "Marketbuddy：市場重掛或跨世界巡價整輪跑完"),
-    "Crafting": ("通知", "Artisan：整份清單製作完成"),
+    "Crafting": ("通知", "Artisan：整份清單製作完成／耐力模式連續製作跑完"),
     "Cosmic": ("通知", "ICE：宇宙探索任務金評"),
     "LowHp": ("警示", "內建：戰鬥中血量跌破門檻"),
     "MarkedByMany": ("警示", "內建：PvP，多個敵對玩家同時鎖定我"),
@@ -61,6 +61,7 @@ SOURCES = {
     "FleetStopFailed": ("通知", "TCToolbox：全艦隊急停有對象沒停下來"),
     "MacroDone": ("通知", "SomethingNeedDoing：巨集自己跑到結束"),
     "RouteDone": ("通知", "visland：採集路線整條走完"),
+    "CosmicStopped": ("通知", "ICE：宇宙探索自動化達成停止條件而收工"),
 }
 
 
