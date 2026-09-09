@@ -166,6 +166,27 @@ public static class PraiseCategory
     public const string FleetStopFailed = "急停失敗";
 
     /// <summary>
+    /// 通知：SomethingNeedDoing 的巨集<b>正常跑完</b>（SomethingNeedDoing 叫）。<b>鍵名由 IPC 呼叫端逐字使用。</b>
+    /// </summary>
+    /// <remarks>
+    /// 📌 只在巨集「自己跑到結束」時響。使用者按停止鈕、巨集出錯、以及被 <c>/runmacro</c> 叫起來的
+    /// <b>子巨集</b>都不算——子巨集在一支巨集裡可能跑幾十次，各響一次就變成洗版。
+    /// ⚠️ 巨集出錯走 <see cref="NeedHelp"/>（那本來就是「自動化卡住了」的鍵），不走這個。
+    /// </remarks>
+    public const string MacroDone = "巨集完成";
+
+    /// <summary>
+    /// 通知：visland 的採集路線<b>整條跑完</b>（visland 叫）。<b>鍵名由 IPC 呼叫端逐字使用。</b>
+    /// </summary>
+    /// <remarks>
+    /// 📌 只在「走到最後一個點而且沒開循環」時響。使用者按停止鈕、刪路線、換路線、卸載外掛都不算；
+    /// 開了循環的路線永遠不會走到這裡（它本來就不會結束）。
+    /// ⚠️ 路線因為連續錯誤被自動停掉時走 <see cref="NeedHelp"/>，不走這個——
+    /// 「跑完了」跟「卡住被迫停下」念同一句話等於沒講。
+    /// </remarks>
+    public const string RouteDone = "路線跑完";
+
+    /// <summary>
     /// 內建情境，順序即 UI 上的顯示順序。
     /// </summary>
     /// <remarks>
@@ -213,6 +234,8 @@ public static class PraiseCategory
         DailyReset,
         FleetStop,
         FleetStopFailed,
+        MacroDone,
+        RouteDone,
     ];
 
     /// <summary>內建情境的預設「情境描述」（餵給文字後端，比分類名多一點上下文）。</summary>
@@ -257,6 +280,8 @@ public static class PraiseCategory
         [DailyReset] = "這是通知，不是誇獎：每日的重置時間到了，新的一輪可以開始。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
         [FleetStop] = "這是通知，不是誇獎：前輩按了全艦隊急停，所有會自己動的外掛都已經停下來了。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
         [FleetStopFailed] = "這是警示，不是誇獎：前輩按了全艦隊急停，但有幾個外掛沒能停下來，要前輩自己過去看一下。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
+        [MacroDone] = "這是通知，不是誇獎：前輩掛著的巨集從頭到尾跑完了。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
+        [RouteDone] = "這是通知，不是誇獎：前輩的採集路線整條走完了。只輸出一句 2~10 字的極短句，像喊出來的一樣；不要說明、不要鋪陳。",
     };
 
     /// <summary>
@@ -313,6 +338,8 @@ public static class PraiseCategory
         [DailyReset] = 12,
         [FleetStop] = 12,
         [FleetStopFailed] = 12,
+        [MacroDone] = 12,
+        [RouteDone] = 12,
     };
 
     /// <summary>
@@ -361,6 +388,8 @@ public static class PraiseCategory
         [DailyReset] = 2,
         [FleetStop] = 2,
         [FleetStopFailed] = 2,
+        [MacroDone] = 2,
+        [RouteDone] = 2,
     };
 
     /// <summary>
@@ -408,6 +437,8 @@ public static class PraiseCategory
         [DailyReset] = 5,
         [FleetStop] = 5,
         [FleetStopFailed] = 5,
+        [MacroDone] = 5,
+        [RouteDone] = 5,
     };
 
     /// <summary>內建的句長下限覆寫；沒有就回 0（＝用全域下限）。</summary>

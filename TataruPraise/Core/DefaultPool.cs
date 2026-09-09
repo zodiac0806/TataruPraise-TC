@@ -73,5 +73,7 @@ public static class DefaultPool
         [PraiseCategory.DailyReset] = ["每日重置！"],
         [PraiseCategory.FleetStop] = ["全部停下來了！", "都幫你停好了！", "緊急停止，完成！", "都停了，放心！"],
         [PraiseCategory.FleetStopFailed] = ["有幾個停不下來！", "有的還沒停下！", "沒全停住，快看！", "快看，有漏的！"],
+        [PraiseCategory.MacroDone] = ["巨集跑完啦！"],
+        [PraiseCategory.RouteDone] = ["路線走完啦！"],
     };
 }

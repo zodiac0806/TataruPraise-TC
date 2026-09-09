@@ -59,6 +59,8 @@ SOURCES = {
     "DailyReset": ("通知", "DailyDuty：每日重置"),
     "FleetStop": ("通知", "TCToolbox：全艦隊急停整輪跑完，全部停妥"),
     "FleetStopFailed": ("通知", "TCToolbox：全艦隊急停有對象沒停下來"),
+    "MacroDone": ("通知", "SomethingNeedDoing：巨集自己跑到結束"),
+    "RouteDone": ("通知", "visland：採集路線整條走完"),
 }
 
 
