@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using System.Numerics;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
@@ -390,9 +391,23 @@ public sealed class TriggerWatcher : IDisposable
     /// 第一次看到某個職業就只記下來、不出聲——代價是「登入後第一次升等」也不會漏，因為那時候已經有紀錄了。
     /// <para>⚠️ 這兩件事都是<b>離線推理</b>，實機上 <c>LevelChanged</c> 到底在登入時會不會發、發幾次，
     /// 我沒有辦法在這裡證明。上面的寫法讓「會發」與「不會發」兩種情況都不會誤觸。</para>
+    /// <para>
+    /// 🔴 <b>等級壓制（副本／大型任務把等級鎖低）也會經過這個事件，而且是雙向的誤觸來源。</b>
+    /// 進入等級壓制的內容：真實等級（例如 90）被壓成內容上限（例如 50），50 &lt; 90，
+    /// 靠上面「新值要比舊值高」那條就已經擋掉了，不需要特別處理。
+    /// 但<b>離開</b>時等級從壓制值（50）恢復回真實等級（90），90 &gt; 50，會被誤判成升等——
+    /// 明明只是恢復原本的等級，卻喊了一句「升等」。用 <see cref="PlayerState.IsLevelSynced"/>
+    /// 判斷：事件發生當下若還處於等級壓制狀態，代表這次變動是壓制／恢復的一部分，不記錄也不觸發，
+    /// 讓 <see cref="knownLevels"/> 繼續保留壓制前的真實等級，離開時的那次回報自然對不上「更高」。
+    /// </para>
     /// </remarks>
-    private void OnLevelChanged(uint classJobId, uint level)
+    private unsafe void OnLevelChanged(uint classJobId, uint level)
     {
+        if (PlayerState.Instance()->IsLevelSynced)
+        {
+            return;
+        }
+
         var hadPrevious = knownLevels.TryGetValue(classJobId, out var previous);
         knownLevels[classJobId] = level;
 
