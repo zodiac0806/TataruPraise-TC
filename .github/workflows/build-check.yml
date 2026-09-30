@@ -29,7 +29,7 @@ jobs:
       - name: Download Dalamud (TC pin)
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri https://github.com/ffxiv-tc-port/DalamudPluginsTC/releases/download/dalamud-pin-v13.0.0.16/dalamud-api13-net9.zip -OutFile dalamud-pinned.zip
+          Invoke-WebRequest -Uri https://github.com/zodiac0806/BossmodReborn-TC/releases/download/dalamud-pin-v13.0.0.16/dalamud-api13-net9.zip -OutFile dalamud-pinned.zip
           Expand-Archive -Force dalamud-pinned.zip "$env:DALAMUD_HOME"
           if (-not (Test-Path "$env:DALAMUD_HOME\Dalamud.dll")) { throw "Dalamud.dll missing" }
         env:
